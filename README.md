@@ -121,31 +121,107 @@ Secrets que deben estar configurados en el repositorio (*Settings → Secrets an
 - `DOCKERHUB_USER`: usuario de Docker Hub.
 - `DOCKERHUB_PASS`: contraseña o *access token* de Docker Hub.
 
-## Despliegue en Docker Swarm
+## Despliegue en GCP con Docker Swarm
 
-En el nodo manager:
+Cada integrante despliega en **su propia cuenta de GCP**. Los dos usan la misma imagen
+`davidfra2/pokeneas` de Docker Hub, y cada uno indica la URL de su bucket con `IMAGES_BASE_URL`.
+
+### 1. Bucket de imágenes (Cloud Storage)
+
+1. En *Cloud Storage → Buckets*, crea un bucket (por ejemplo `pokeneas-<usuario>`).
+2. Dale acceso público de lectura: en *Permissions → Grant access*, agrega el principal `allUsers`
+   con el rol *Storage Object Viewer*.
+3. Sube las imágenes con los mismos nombres que tienen en el campo `imagen` de `src/data/pokeneas.js`.
+
+La URL base del bucket queda así: `https://storage.googleapis.com/<nombre-del-bucket>`.
+
+Con `gcloud`, lo mismo se hace así:
 
 ```bash
-docker swarm init
-docker service create \
+gcloud storage buckets create gs://<nombre-del-bucket> --uniform-bucket-level-access
+gcloud storage buckets add-iam-policy-binding gs://<nombre-del-bucket> \
+  --member=allUsers --role=roles/storage.objectViewer
+gcloud storage cp <carpeta-imagenes>/*.png gs://<nombre-del-bucket>/
+```
+
+### 2. Instance template con Docker
+
+En *Compute Engine → Instance templates → Create instance template*:
+
+- **Tipo de máquina:** `e2-micro`.
+- **Sistema operativo:** Debian 13 Trixie.
+- **Firewall:** activa *Allow HTTP traffic* y *Allow HTTPS traffic*.
+- **Startup script** (en *Advanced options → Management → Automation*): pega el script del Tutorial 07,
+  que instala Docker Engine.
+
+### 3. Grupo de 4 instancias
+
+1. Desde el template, entra a *Create instance group*.
+2. En *Number of instances* pon **4** y en *Location* elige *Single zone*.
+3. En *Autoscaling* elige *Off: do not autoscale*.
+
+Espera unos 5 minutos. Luego, por SSH, verifica en cada instancia que Docker quedó instalado:
+
+```bash
+docker -v
+```
+
+### 4. Crear el Swarm (1 líder + 3 managers)
+
+En la instancia **líder** (nodo-01):
+
+```bash
+sudo docker swarm init
+sudo docker swarm join-token manager   # copia el comando "docker swarm join --token ..."
+```
+
+En cada una de las **otras 3 instancias**, ejecuta el comando copiado con `sudo` adelante:
+
+```bash
+sudo docker swarm join --token <token-manager> <ip-interna-lider>:2377
+```
+
+Verifica desde el líder que los 4 nodos aparecen y que el estado de cada uno es *Leader* o *Reachable*:
+
+```bash
+sudo docker node ls
+```
+
+### 5. Crear el servicio con 10 réplicas
+
+Desde el líder:
+
+```bash
+sudo docker service create \
   --name pokeneas \
-  --replicas 3 \
+  --replicas 10 \
   -p 80:80 \
-  -e IMAGES_BASE_URL=https://storage.googleapis.com/mi-bucket \
+  -e IMAGES_BASE_URL=https://storage.googleapis.com/<nombre-del-bucket> \
   davidfra2/pokeneas:latest
 ```
 
-Para unir más nodos, ejecuta en cada uno el comando `docker swarm join ...` que imprime `swarm init`.
-Al refrescar `/api/pokenea` o `/pokenea`, el `containerId` cambia según la réplica que atiende.
-
-Comandos útiles:
+### 6. Verificación
 
 ```bash
-docker service ls
-docker service ps pokeneas
-docker service update --image davidfra2/pokeneas:latest pokeneas   # actualizar a la última imagen
-docker service scale pokeneas=5
+sudo docker service ls             # debe mostrar 10/10
+sudo docker service ps pokeneas    # las 10 réplicas y el nodo donde corre cada una
+sudo docker container ls           # contenedores del nodo actual
 ```
+
+Abre `http://<IP-externa-de-cualquier-nodo>/api/pokenea` y `http://<IP-externa>/pokenea`. Recarga cada
+pocos segundos (o abre una ventana de incógnito): el `containerId` debe cambiar, porque Swarm reparte
+las peticiones entre las réplicas de los 4 nodos.
+
+### Comandos útiles
+
+```bash
+sudo docker service update --image davidfra2/pokeneas:latest pokeneas   # actualizar a la última imagen
+sudo docker service scale pokeneas=10
+sudo docker service logs pokeneas
+sudo docker service rm pokeneas
+```
+
+Después de la sustentación, borra el instance group para no gastar créditos.
 
 ## Equipo
 
