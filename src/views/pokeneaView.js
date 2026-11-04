@@ -1,15 +1,22 @@
 const fs = require('fs');
 const path = require('path');
 
-const plantilla = fs.readFileSync(path.join(__dirname, 'pokenea.html'), 'utf8');
+const TEMPLATE = fs.readFileSync(path.join(__dirname, 'pokenea.html'), 'utf8');
+const PLACEHOLDER_PATTERN = /{{(\w+)}}/g;
+const HTML_ESCAPES = {
+  '&': '&amp;',
+  '<': '&lt;',
+  '>': '&gt;',
+  '"': '&quot;',
+  "'": '&#39;',
+};
 
-function escapar(texto) {
-  return String(texto).replace(/[&<>"']/g, (c) =>
-    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+function escapeHtml(text) {
+  return String(text).replace(/[&<>"']/g, (char) => HTML_ESCAPES[char]);
 }
 
-function renderPokenea(datos) {
-  return plantilla.replace(/{{(\w+)}}/g, (_, clave) => escapar(datos[clave] ?? ''));
+function renderPokenea(viewData) {
+  return TEMPLATE.replace(PLACEHOLDER_PATTERN, (_, key) => escapeHtml(viewData[key] ?? ''));
 }
 
 module.exports = { renderPokenea };

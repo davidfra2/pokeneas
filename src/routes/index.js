@@ -1,14 +1,12 @@
-const path = require('path');
 const { Router } = require('express');
+const homeController = require('../controllers/homeController');
 const apiRoutes = require('./apiRoutes');
+const pokeneaRoutes = require('./pokeneaRoutes');
 
 const router = Router();
 
-router.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'views', 'index.html'));
-});
-
+router.get('/', homeController.showHome);
 router.use('/api', apiRoutes);
-router.use('/pokenea', require('./pokeneaRoutes'));
+router.use('/pokenea', pokeneaRoutes);
 
 module.exports = router;

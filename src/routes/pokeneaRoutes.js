@@ -1,7 +1,8 @@
-const express = require('express');
-const { mostrarPokenea } = require('../controllers/pokeneaController');
+const { Router } = require('express');
+const pokeneaController = require('../controllers/pokeneaController');
 
-const router = express.Router();
-router.get('/', mostrarPokenea);
+const router = Router();
+
+router.get('/', pokeneaController.showRandomPokenea);
 
 module.exports = router;
