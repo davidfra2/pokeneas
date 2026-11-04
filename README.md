@@ -21,9 +21,9 @@ Ejemplo de respuesta de `/api/pokenea`:
 ```json
 {
   "id": 1,
-  "nombre": "Paisachu",
-  "altura": 0.4,
-  "habilidad": "Echar cuento",
+  "nombre": "Chigüinea",
+  "altura": 0.25,
+  "habilidad": "Paso Pesado / Caleta Subterránea",
   "containerId": "3f2a9c1b7d4e"
 }
 ```
@@ -35,13 +35,28 @@ Cada pokenea tiene esta forma (en `src/data/pokeneas.js`):
 ```js
 {
   id: 1,
-  nombre: 'Paisachu',
-  altura: 0.4,
-  habilidad: 'Echar cuento',
-  imagen: 'paisachu.png',          // solo el nombre del archivo en el bucket
-  fraseFilosofica: 'El que nada debe, nada teme... pero igual pide la cuenta.',
+  nombre: 'Chigüinea',
+  altura: 0.25,
+  habilidad: 'Paso Pesado / Caleta Subterránea',
+  imagen: 'chiguinea.png',         // solo el nombre del archivo en el bucket
+  fraseFilosofica: 'El vivo vive del bobo, parcero, y el que no, brega.',
 }
 ```
+
+### Pokeneas disponibles
+
+| id | Nombre       | Altura (m) | Habilidad                                       | Imagen             |
+| -- | ------------ | ---------- | ----------------------------------------------- | ------------------ |
+| 1  | Chigüinea    | 0.25       | Paso Pesado / Caleta Subterránea                | `chiguinea.png`    |
+| 2  | Verdolaguito | 1          | Garra Verde / Aguante verdolaga                 | `verdolaguito.png` |
+| 3  | Eléctronea   | 0.4        | Voltaje Pesado / Organizar planchones en Guatapé | `electronea.png`   |
+| 4  | Arroyito     | 0.2        | Sonido Callejero                                | `arroyito.png`     |
+| 5  | Milocan      | 0.9        | Espíritu Mañanero                               | `milocan.png`      |
+| 6  | Zarco        | 0.8        | Acelerón NMAX / Ser el más fara de todo Medallo | `zarco.png`        |
+| 7  | Gurrero      | 1.5        | Caparazón de Carriel                            | `gurrero.png`      |
+| 8  | Neaclo       | 1.2        | Multi-brazo Callejero                           | `neaclo.png`       |
+
+El bucket debe tener exactamente esos 8 archivos de imagen, con los mismos nombres.
 
 Las imágenes están en un bucket de **Google Cloud Storage**. La URL completa se arma como
 `IMAGES_BASE_URL + "/" + imagen`.
@@ -68,17 +83,30 @@ src/
 ├── utils/
 │   └── container.js             getContainerId() con os.hostname()
 ├── controllers/
-│   └── apiController.js         Arma la respuesta JSON
+│   ├── homeController.js        Envía la página de inicio
+│   ├── apiController.js         Arma la respuesta JSON
+│   └── pokeneaController.js     Arma los datos de la vista y la renderiza
 ├── routes/
 │   ├── index.js                 Router principal: "/", "/api" y "/pokenea"
-│   └── apiRoutes.js             GET /api/pokenea
-└── views/                       Vistas HTML
+│   ├── apiRoutes.js             GET /api/pokenea
+│   └── pokeneaRoutes.js         GET /pokenea
+├── views/
+│   ├── index.html               Página de inicio
+│   ├── pokenea.html             Plantilla de la vista con marcadores {{campo}}
+│   └── pokeneaView.js           renderPokenea(datos): llena la plantilla
+└── public/
+    └── css/pokenea.css          Estilos de la vista (servidos como estáticos)
 ```
 
 - **`app.js` y `server.js` están separados** para poder importar la app sin abrir el puerto, por
   ejemplo en pruebas.
 - **`toPublicJson`** expone solo los campos públicos. Por eso la ruta JSON no devuelve la imagen ni
   la frase.
+- **Las vistas no usan motor de plantillas.** `pokeneaView.js` lee `pokenea.html` una sola vez al
+  arrancar y reemplaza cada `{{campo}}` por su valor, escapando el HTML (`&`, `<`, `>`, `"`, `'`)
+  para evitar inyección de código.
+- **Los archivos estáticos** de `src/public` se sirven con `express.static`, por eso la hoja de
+  estilos se pide como `/css/pokenea.css`.
 
 ## Variables de entorno
 
@@ -226,4 +254,5 @@ Después de la sustentación, borra el instance group para no gastar créditos.
 ## Equipo
 
 - **David Ríos**: base del proyecto (arquitectura, ruta JSON, Docker, CI y README).
-- **Gisel**: datos finales de los pokeneas y vista `/pokenea`.
+- **Gisel**: datos de los 8 pokeneas, ruta y vista `/pokenea` (plantilla HTML, CSS y render con
+  escape de HTML) y página de inicio como archivo HTML aparte.
