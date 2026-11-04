@@ -1,20 +1,28 @@
-// Datos de ejemplo. Reemplazar con el arreglo final de pokeneas.
-// "imagen" guarda solo el nombre del archivo dentro del bucket (IMAGES_BASE_URL).
-module.exports = [
-  {
-    id: 1,
-    nombre: 'Paisachu',
-    altura: 0.4,
-    habilidad: 'Echar cuento',
-    imagen: 'paisachu.png',
-    fraseFilosofica: 'El que nada debe, nada teme... pero igual pide la cuenta.',
-  },
-  {
-    id: 2,
-    nombre: 'Arrierasaur',
-    altura: 1.7,
-    habilidad: 'Cargar mulas',
-    imagen: 'arrierasaur.png',
-    fraseFilosofica: 'Despacio se llega lejos, y con arepa se llega más.',
-  },
+const pokeneas = [
+  { id: 1, nombre: 'Chigüinea', altura: 0.25, habilidad: 'Paso Pesado / Caleta Subterránea',
+    imagen: 'chiguinea.png',
+    fraseFilosofica: 'El vivo vive del bobo, parcero, y el que no, brega.' },
+  { id: 2, nombre: 'Verdolaguito', altura: 1, habilidad: 'Garra Verde / Aguante verdolaga',
+    imagen: 'verdolaguito.png',
+    fraseFilosofica: 'Todo bien, todo bonito. Solo Nacional a morir. ¿Sabe qué?, solo Nacional. Fuiciosos' },
+  { id: 3, nombre: 'Eléctronea', altura: 0.40, habilidad: 'Voltaje Pesado/organizar planchones en Guatapé',
+    imagen: 'electronea.png',
+    fraseFilosofica: 'Sóbelo mi Fafa.' },
+  { id: 4, nombre: 'Arroyito', altura: 0.20, habilidad: 'Sonido Callejero',
+    imagen: 'arroyito.png',
+    fraseFilosofica: 'Real hasta la muerte oíste bebé Brrr.' },
+  { id: 5, nombre: 'Milocan', altura: 0.9, habilidad: 'Espíritu Mañanero',
+    imagen: 'milocan.png',
+    fraseFilosofica: 'Al que madruga, Dios le ayuda.' },
+  { id: 6, nombre: 'Zarco', altura: 0.80, habilidad: 'Acelerón NMAX/ser el más fara de todo medallo',
+    imagen: 'zarco.png',
+    fraseFilosofica: 'Ignore y niegue.' },
+  { id: 7, nombre: 'Gurrero', altura: 1.5, habilidad: 'Caparazón de Carriel.',
+    imagen: 'gurrero.png',
+    fraseFilosofica: 'parchado, porque el bobo se estresa y el sabio se parcha.' },
+  { id: 8, nombre: 'Neaclo', altura: 1.2, habilidad: 'Multi-brazo Callejero',
+    imagen: 'neaclo.png',
+    fraseFilosofica: 'Mijo, camellar con berraquera y comerse las empanadas con la frente en alto, porque el que obra bien, por la sombrita camina y a ningún chicanero le teme.' },
 ];
+
+module.exports = pokeneas;
